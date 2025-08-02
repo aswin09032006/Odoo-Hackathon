@@ -1,13 +1,14 @@
 /**
  * @file App.jsx
- * @description Main application component. Sets up React Router for navigation
- *              and implements role-based protected routes.
+ * @description Main application component. Sets up React Router for navigation,
+ *              implements role-based protected routes, and integrates the site-wide chatbot.
  */
 
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth'; // Custom hook for authentication context
 import Sidebar from './components/Layout/Sidebar'; // New Sidebar component
 import LoadingSpinner from './components/Common/LoadingSpinner'; // For initial loading screen
+import Chatbot from './components/Chatbot'; // Import the new Chatbot component
 
 // --- Page Components ---
 import LoginPage from './pages/Auth/LoginPage';
@@ -55,6 +56,9 @@ const ProtectedRoute = ({ children, roles }) => {
 };
 
 function App() {
+  // Get the authentication status to conditionally render the chatbot
+  const { isAuthenticated } = useAuth();
+
   return (
     <Router>
       {/*
