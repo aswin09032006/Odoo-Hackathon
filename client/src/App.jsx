@@ -8,21 +8,21 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 import { useAuth } from './hooks/useAuth';
 import { useWindowSize } from './hooks/useWindowSize';
 import Sidebar from './components/Layout/Sidebar';
-import Topbar from './components/Layout/topbar'; // Import the new Topbar
+import Topbar from './components/Layout/topbar';
 import LoadingSpinner from './components/Common/LoadingSpinner';
-
 
 // --- Page Components ---
 import LoginPage from './pages/Auth/LoginPage';
 import RegisterPage from './pages/Auth/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
-// ... other page imports
 import TicketCreatePage from './pages/TicketCreatePage';
 import TicketDetailPage from './pages/TicketDetailPage';
 import ProfilePage from './pages/ProfilePage';
 import UserManagement from './pages/Admin/UserManagement';
 import CategoryManagement from './pages/Admin/CategoryManagement';
 
+// --- IMPORT THE CHATBOT COMPONENT ---
+import Chatbot from './components/Chatbot'; // Correct path to your component
 
 const ProtectedRoute = ({ children, roles }) => {
   const { user, isAuthenticated, loading } = useAuth();
@@ -45,12 +45,13 @@ const ProtectedRoute = ({ children, roles }) => {
 const AppLayout = () => {
   const location = useLocation();
   const { width } = useWindowSize();
+  const { isAuthenticated } = useAuth(); // Get authentication status
   
-  // Mobile breakpoint (Tailwind's 'md' is 768px)
   const isMobile = width < 768;
 
   const noSidebarPaths = ['/login', '/register'];
-  const showNav = !noSidebarPaths.includes(location.pathname);
+  // This is a great proxy for being authenticated
+  const showNav = !noSidebarPaths.includes(location.pathname) && isAuthenticated;
 
   const AppRoutes = (
       <Routes>
@@ -69,7 +70,8 @@ const AppLayout = () => {
       </Routes>
   );
 
-  if (!showNav) {
+  // This block handles the public routes like Login/Register
+  if (!showNav && !isAuthenticated) {
     return (
         <div className="h-screen bg-gray-100">
             {AppRoutes}
@@ -77,21 +79,33 @@ const AppLayout = () => {
     );
   }
 
-  return isMobile ? (
-    // MOBILE LAYOUT (Topbar + Main Content)
-    <div className="flex flex-col h-screen bg-gray-100">
-      <Topbar />
-      <main className="flex-1 overflow-y-auto p-4 md:p-6">
-        {AppRoutes}
-      </main>
-    </div>
-  ) : (
-    // DESKTOP LAYOUT (Sidebar + Main Content)
-    <div className="flex h-screen bg-gray-100 overflow-hidden">
-      <Sidebar />
-      <main className="flex-1 flex flex-col overflow-x-hidden overflow-y-auto p-6 md:p-8">
-        {AppRoutes}
-      </main>
+  // This is the main layout for authenticated users
+  return (
+    <div className="relative h-screen">
+      {isMobile ? (
+        // MOBILE LAYOUT
+        <div className="flex flex-col h-screen bg-gray-100">
+          <Topbar />
+          <main className="flex-1 overflow-y-auto p-4 md:p-6">
+            {AppRoutes}
+          </main>
+        </div>
+      ) : (
+        // DESKTOP LAYOUT
+        <div className="flex h-screen bg-gray-100 overflow-hidden">
+          <Sidebar />
+          <main className="flex-1 flex flex-col overflow-x-hidden overflow-y-auto p-6 md:p-8">
+            {AppRoutes}
+          </main>
+        </div>
+      )}
+
+      {/* 
+        ADD THE CHATBOT HERE
+        It is placed outside the mobile/desktop layout blocks so it works on both.
+        The `showNav` check ensures it only appears when the user is logged in.
+      */}
+      {showNav && <Chatbot />}
     </div>
   );
 };
