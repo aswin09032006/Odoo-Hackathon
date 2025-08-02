@@ -5,6 +5,8 @@
  */
 
 import axios from 'axios';
+// import { toast } from 'react-toastify'; // Removed react-toastify
+import toast from 'react-hot-toast'; // Added react-hot-toast
 
 // Create an Axios instance with a base URL.
 // The base URL is pulled from environment variables (e.g., .env.development, .env.production).
@@ -46,6 +48,7 @@ api.interceptors.response.use(
     // Check if the error is a 401 Unauthorized response
     if (error.response && error.response.status === 401) {
       console.error('API Error: 401 Unauthorized. Token might be expired or invalid.');
+      toast.error('Session expired or unauthorized. Please log in again.'); // Use react-hot-toast
       // Remove the invalid token and trigger a logout (e.g., by reloading or dispatching a global logout action)
       localStorage.removeItem('token');
       // A more robust solution would be to dispatch a global logout action

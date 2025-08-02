@@ -8,7 +8,8 @@
 
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import api from '../api'; // Axios instance for API calls
-import { toast } from 'react-toastify'; // For UI notifications
+// import { toast } from 'react-toastify'; // For UI notifications - Removed react-toastify
+import toast from 'react-hot-toast'; // For UI notifications - Added react-hot-toast
 
 // FIX: Add 'export' here to make AuthContext a named export
 export const AuthContext = createContext();
@@ -64,11 +65,11 @@ export const AuthProvider = ({ children }) => {
       api.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`; // Set default header
       setUser(res.data);
       setIsAuthenticated(true);
-      toast.success(`Welcome back, ${res.data.username}!`);
+      toast.success(`Welcome back, ${res.data.username}!`); // Used react-hot-toast
       return { success: true };
     } catch (err) {
       const message = err.response?.data?.message || err.message || 'Login failed';
-      toast.error(message);
+      toast.error(message); // Used react-hot-toast
       setIsAuthenticated(false);
       setUser(null);
       return { success: false, message };
@@ -90,11 +91,11 @@ export const AuthProvider = ({ children }) => {
       api.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
       setUser(res.data);
       setIsAuthenticated(true);
-      toast.success(`Account created successfully! Welcome, ${res.data.username}!`);
+      toast.success(`Account created successfully! Welcome, ${res.data.username}!`); // Used react-hot-toast
       return { success: true };
     } catch (err) {
       const message = err.response?.data?.error || err.response?.data?.message || err.message || 'Registration failed';
-      toast.error(message);
+      toast.error(message); // Used react-hot-toast
       setIsAuthenticated(false);
       setUser(null);
       return { success: false, message };
@@ -112,7 +113,7 @@ export const AuthProvider = ({ children }) => {
     delete api.defaults.headers.common['Authorization']; // Remove auth header
     setIsAuthenticated(false);
     setUser(null);
-    toast.info('You have been logged out.');
+    toast.info('You have been logged out.'); // Used react-hot-toast
   };
 
   // Provide the authentication state and functions to children components

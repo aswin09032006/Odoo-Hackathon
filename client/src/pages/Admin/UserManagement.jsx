@@ -5,12 +5,14 @@
 
 import moment from 'moment';
 import { useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
+// import { toast } from 'react-toastify'; // Removed react-toastify
+import toast from 'react-hot-toast'; // Added react-hot-toast
 import api from '../../api';
 import Button from '../../components/Common/Button';
 import Input from '../../components/Common/Input';
 import LoadingSpinner from '../../components/Common/LoadingSpinner';
 import Modal from '../../components/Common/Modal'; // Assuming a generic modal component
+import clsx from 'clsx'; // Import clsx
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -41,7 +43,7 @@ const UserManagement = () => {
     } catch (err) {
       console.error('Error fetching users:', err);
       setError(err.response?.data?.message || 'Failed to fetch users.');
-      toast.error(err.response?.data?.message || 'Failed to load users');
+      toast.error(err.response?.data?.message || 'Failed to load users'); // Used react-hot-toast
     } finally {
       setLoading(false);
     }
@@ -98,7 +100,7 @@ const UserManagement = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) {
-      toast.error('Please correct the form errors.');
+      toast.error('Please correct the form errors.'); // Used react-hot-toast
       return;
     }
 
@@ -116,17 +118,17 @@ const UserManagement = () => {
           updateData.password = formData.password;
         }
         await api.put(`/users/${currentUser._id}`, updateData);
-        toast.success('User updated successfully!');
+        toast.success('User updated successfully!'); // Used react-hot-toast
       } else {
         // Create new user
         await api.post('/users', formData);
-        toast.success('User created successfully!');
+        toast.success('User created successfully!'); // Used react-hot-toast
       }
       setShowModal(false);
       await fetchUsers(); // Re-fetch users to update the list
     } catch (err) {
       console.error('Error saving user:', err);
-      toast.error(err.response?.data?.error || err.response?.data?.message || 'Failed to save user.');
+      toast.error(err.response?.data?.error || err.response?.data?.message || 'Failed to save user.'); // Used react-hot-toast
     } finally {
       setLoading(false);
     }
@@ -138,11 +140,11 @@ const UserManagement = () => {
       setLoading(true);
       try {
         await api.delete(`/users/${userId}`);
-        toast.success('User deleted successfully!');
+        toast.success('User deleted successfully!'); // Used react-hot-toast
         await fetchUsers(); // Re-fetch users
       } catch (err) {
         console.error('Error deleting user:', err);
-        toast.error(err.response?.data?.error || 'Failed to delete user.');
+        toast.error(err.response?.data?.error || 'Failed to delete user.'); // Used react-hot-toast
       } finally {
         setLoading(false);
       }
@@ -151,7 +153,7 @@ const UserManagement = () => {
 
   if (loading && users.length === 0) {
     return (
-      <div className="flex justify-center items-center min-h-[calc(100vh-80px)]">
+      <div className="flex justify-center items-center flex-1"> {/* Adjusted for new layout */}
         <LoadingSpinner size="lg" />
         <p className="ml-3 text-lg text-gray-700">Loading users...</p>
       </div>
@@ -163,10 +165,10 @@ const UserManagement = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 my-8 bg-white rounded-lg shadow-xl">
+    <div className="container mx-auto p-6 bg-white rounded-lg shadow-xl"> {/* Consistent container styling */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800">User Management</h1>
-        <Button onClick={handleCreateClick} className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md">
+        <Button onClick={handleCreateClick} className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md"> {/* Changed rounded to rounded-md */}
           Add New User
         </Button>
       </div>
@@ -175,28 +177,28 @@ const UserManagement = () => {
         <p className="text-center text-gray-600 text-xl py-10">No users found.</p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="min-w-full bg-white border border-gray-200 rounded-lg">
+          <table className="min-w-full bg-white border border-gray-200 rounded-lg overflow-hidden"> {/* Added overflow-hidden for rounded corners */}
             <thead>
               <tr className="bg-gray-100 text-left text-sm text-gray-600 uppercase tracking-wider">
-                <th className="py-3 px-4 border-b">Username</th>
-                <th className="py-3 px-4 border-b">Email</th>
-                <th className="py-3 px-4 border-b">Role</th>
-                <th className="py-3 px-4 border-b">Created At</th>
-                <th className="py-3 px-4 border-b text-center">Actions</th>
+                <th className="py-3 px-4 border-b border-gray-200">Username</th>
+                <th className="py-3 px-4 border-b border-gray-200">Email</th>
+                <th className="py-3 px-4 border-b border-gray-200">Role</th>
+                <th className="py-3 px-4 border-b border-gray-200">Created At</th>
+                <th className="py-3 px-4 border-b border-gray-200 text-center">Actions</th>
               </tr>
             </thead>
             <tbody>
               {users.map((user) => (
-                <tr key={user._id} className="border-b border-gray-200 hover:bg-gray-50">
+                <tr key={user._id} className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50"> {/* Changed border-gray-200 to border-gray-100, and last:border-b-0 */}
                   <td className="py-3 px-4">{user.username}</td>
                   <td className="py-3 px-4">{user.email}</td>
                   <td className="py-3 px-4 capitalize">{user.role}</td>
                   <td className="py-3 px-4">{moment(user.createdAt).format('YYYY-MM-DD')}</td>
                   <td className="py-3 px-4 text-center">
-                    <Button onClick={() => handleEditClick(user)} className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-md text-sm mr-2">
+                    <Button onClick={() => handleEditClick(user)} className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-md text-sm mr-2"> {/* Changed rounded to rounded-md */}
                       Edit
                     </Button>
-                    <Button onClick={() => handleDelete(user._id)} className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm">
+                    <Button onClick={() => handleDelete(user._id)} className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm"> {/* Changed rounded to rounded-md */}
                       Delete
                     </Button>
                   </td>
@@ -238,13 +240,13 @@ const UserManagement = () => {
             error={formErrors.password}
           />
           <div className="mb-4">
-            <label htmlFor="role" className="block text-gray-700 text-sm font-bold mb-2">Role:</label>
+            <label htmlFor="role" className="block text-gray-700 text-sm font-semibold mb-2">Role:</label> {/* Changed font-bold to font-semibold */}
             <select
               id="role"
               name="role"
               value={formData.role}
               onChange={handleChange}
-              className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="shadow border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-blue-500 focus:border-blue-500" // Updated styles
             >
               {roles.map(role => (
                 <option key={role} value={role} className="capitalize">{role}</option>
@@ -252,10 +254,10 @@ const UserManagement = () => {
             </select>
           </div>
           <div className="flex justify-end gap-3 mt-6">
-            <Button type="button" onClick={() => setShowModal(false)} className="bg-gray-300 hover:bg-gray-400 text-gray-800">
+            <Button type="button" onClick={() => setShowModal(false)} className="bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-md"> {/* Changed rounded to rounded-md */}
               Cancel
             </Button>
-            <Button type="submit" disabled={loading} className="bg-blue-600 hover:bg-blue-700 text-white">
+            <Button type="submit" disabled={loading} className="bg-blue-600 hover:bg-blue-700 text-white rounded-md"> {/* Changed rounded to rounded-md */}
               {loading ? <LoadingSpinner size="sm" color="white" /> : (isEditing ? 'Save Changes' : 'Create User')}
             </Button>
           </div>

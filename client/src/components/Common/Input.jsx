@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import clsx from 'clsx'; // Import clsx
 
 /**
  * A reusable input field component.
@@ -23,14 +24,21 @@ const Input = ({ type = 'text', id, className = '', required = false, placeholde
   return (
     <div className="mb-4">
       {label && (
-        <label htmlFor={id} className="block text-gray-700 text-sm font-bold mb-2">
+        <label htmlFor={id} className="block text-gray-700 text-sm font-semibold mb-2"> {/* Changed font-bold to font-semibold */}
           {label} {required && <span className="text-red-500">*</span>}
         </label>
       )}
       <input
         type={type}
         id={id}
-        className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${error ? 'border-red-500' : ''} ${className}`}
+        className={clsx(
+          "block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm",
+          "text-gray-900 placeholder-gray-500",
+          "focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none", // Modern focus styles
+          "transition-colors duration-200 ease-in-out", // Smooth transitions
+          error ? 'border-red-500' : '',
+          className
+        )}
         placeholder={placeholder}
         value={value}
         onChange={onChange}

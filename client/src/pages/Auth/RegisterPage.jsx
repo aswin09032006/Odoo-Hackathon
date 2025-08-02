@@ -6,9 +6,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import Input from '../../components/Common/Input';
-import Button from '../../components/Common/Button';
-import LoadingSpinner from '../../components/Common/LoadingSpinner'; // For loading state
+import Input from '../../components/Common/Input'; // Assuming Input component has consistent styling
+import Button from '../../components/Common/Button'; // Assuming Button component has consistent styling
+import LoadingSpinner from '../../components/Common/LoadingSpinner';
+import toast from 'react-hot-toast';
 
 function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -17,23 +18,21 @@ function RegisterPage() {
     password: '',
     passwordConfirm: '',
   });
-  const [errors, setErrors] = useState({}); // State for form validation errors
+  const [errors, setErrors] = useState({});
   const { register, loading } = useAuth();
   const navigate = useNavigate();
 
-  // Destructure formData for easier access
   const { username, email, password, passwordConfirm } = formData;
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    // Clear error for the field being changed
     setErrors(prev => ({ ...prev, [e.target.name]: '' }));
   };
 
   const validateForm = () => {
     const newErrors = {};
-    if (!username) newErrors.username = 'Username is required.';
-    if (!email) newErrors.email = 'Email is required.';
+    if (!username.trim()) newErrors.username = 'Username is required.';
+    if (!email.trim()) newErrors.email = 'Email is required.';
     else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = 'Email address is invalid.';
     if (!password) newErrors.password = 'Password is required.';
     else if (password.length < 6) newErrors.password = 'Password must be at least 6 characters.';
@@ -45,20 +44,23 @@ function RegisterPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) {
-      return; // Stop if validation fails
+      toast.error('Please fix the errors in the form.');
+      return;
     }
 
     const result = await register({ username, email, password });
     if (result.success) {
-      navigate('/dashboard'); // Redirect to dashboard on successful registration
+      navigate('/dashboard');
     }
     // Error messages are handled by toast notifications via AuthContext
   };
 
   return (
-    <div className="flex justify-center items-center min-h-[calc(100vh-80px)]">
-      <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
-        <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">Register for QuickDesk</h2>
+    <div className="flex justify-center items-center flex-1 px-4"> {/* Added horizontal padding */}
+      {/* Form Container: Replaced shadow with border, adjusted padding */}
+      <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg border border-gray-200 w-full max-w-md">
+        {/* Title: Reduced font size, uppercase, blue themed, tracking-wide */}
+        <h2 className="text-xl font-semibold uppercase tracking-wide mb-8 text-center text-[#504ee2]">Register for QuickDesk</h2>
 
         <Input
           label="Username"
@@ -108,10 +110,11 @@ function RegisterPage() {
           error={errors.passwordConfirm}
         />
 
+        {/* Register Button: Blue themed, font-medium */}
         <Button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-200 mt-4 flex items-center justify-center"
+          className="w-full bg-[#504ee2] hover:bg-[#433ed1] text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 mt-6 flex items-center justify-center"
         >
           {loading ? (
             <>
@@ -127,7 +130,7 @@ function RegisterPage() {
           <button
             type="button"
             onClick={() => navigate('/login')}
-            className="text-blue-500 hover:text-blue-800 font-medium"
+            className="text-[#504ee2] hover:text-[#433ed1] font-medium transition-colors duration-200" // Blue themed login link
           >
             Login
           </button>

@@ -6,7 +6,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../api';
-import { toast } from 'react-toastify';
+import toast from 'react-hot-toast'; // Added react-hot-toast
 import LoadingSpinner from '../components/Common/LoadingSpinner';
 import FilterBar from '../components/Dashboard/FilterBar';
 import TicketCard from '../components/Dashboard/TicketCard';
@@ -55,7 +55,7 @@ const DashboardPage = () => {
     } catch (err) {
       console.error('Error fetching tickets:', err);
       setError(err.response?.data?.message || 'Failed to fetch tickets.');
-      toast.error(err.response?.data?.message || 'Failed to load tickets');
+      toast.error(err.response?.data?.message || 'Failed to load tickets'); // Used react-hot-toast
     } finally {
       setLoading(false);
     }
@@ -79,7 +79,7 @@ const DashboardPage = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-[calc(100vh-80px)]">
+      <div className="flex justify-center items-center flex-1 py-12 min-h-[400px]">
         <LoadingSpinner size="lg" />
         <p className="ml-3 text-lg text-gray-700">Loading tickets...</p>
       </div>
@@ -87,41 +87,47 @@ const DashboardPage = () => {
   }
 
   if (error) {
-    return <div className="text-center text-red-500 text-lg mt-8">{error}</div>;
+    return <div className="text-center text-red-500 text-lg py-12 mt-8">{error}</div>;
   }
 
   return (
-    <div className="p-4">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">Ticket Dashboard</h1>
-
+    <div className="container mx-auto rounded-lg px-4">
       {/* Filter Bar Component */}
-      <FilterBar
-        filters={filters}
-        onFiltersChange={setFilters}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        sortBy={sortBy}
-        onSortChange={setSortBy}
-        showMyTicketsToggle={user && (user.role === 'support-agent' || user.role === 'admin')}
-      />
+      <div className="mb-8">
+        <h2 className="text-sm uppercase font-medium text-[#504ee2] mb-4 border-b border-gray-200 pb-2">Filters & Search</h2>
+        <FilterBar
+          filters={filters}
+          onFiltersChange={setFilters}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          sortBy={sortBy}
+          onSortChange={setSortBy}
+          showMyTicketsToggle={user && (user.role === 'support-agent' || user.role === 'admin')}
+        />
+      </div>
 
       {totalTicketsCount === 0 ? (
-        <div className="text-center text-gray-600 text-xl py-10">No tickets found matching your criteria.</div>
+        <div className="text-center text-gray-600 text-lg py-12">No tickets found matching your criteria.</div>
       ) : (
         <>
           {/* Tickets Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {tickets.map((ticket) => (
-              <TicketCard key={ticket._id} ticket={ticket} />
-            ))}
+          <div className="mb-8">
+            <h2 className="text-sm uppercase font-medium text-[#504ee2] mb-4 border-b border-gray-200 pb-2">Your Tickets ({totalTicketsCount})</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {tickets.map((ticket) => (
+                <TicketCard key={ticket._id} ticket={ticket} />
+              ))}
+            </div>
           </div>
 
           {/* Pagination Component */}
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-          />
+          <div className="mt-8">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </div>
         </>
       )}
     </div>

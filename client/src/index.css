@@ -10,18 +10,16 @@
 
 /* Custom base styles if needed, e.g., font-families, background colors */
 body {
-  font-family: 'Inter', sans-serif; /* Example: use a specific font */
   background-color: #f4f7f6; /* Light gray background */
   color: #333;
 }
 
-/* Container for consistent page width */
+/* Container for consistent page width (used implicitly or on specific page components) */
 .container {
   max-width: 1200px;
   margin-left: auto;
   margin-right: auto;
-  padding-left: 1rem; /* Equivalent to px-4 in Tailwind */
-  padding-right: 1rem; /* Equivalent to px-4 in Tailwind */
+  /* Removed padding here as it's typically applied within the specific page component or main layout */
 }
 
 /* Simple scrollbar styling (optional) */

@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import api from '../api';
-import { toast } from 'react-toastify';
+import toast from 'react-hot-toast'; // Added react-hot-toast
 import Input from '../components/Common/Input';
 import Button from '../components/Common/Button';
 import LoadingSpinner from '../components/Common/LoadingSpinner';
@@ -58,7 +58,7 @@ const ProfilePage = () => {
   const handleSubmitProfileUpdate = async (e) => {
     e.preventDefault();
     if (!validateForm()) {
-      toast.error('Please fix the errors in the form.');
+      toast.error('Please fix the errors in the form.'); // Used react-hot-toast
       return;
     }
 
@@ -68,16 +68,14 @@ const ProfilePage = () => {
         username: formData.username,
         email: formData.email,
       };
-      // For simplicity, directly calling update user API. In a real app, you might have separate endpoints.
       await api.put(`/users/${user._id}`, updateData);
-      toast.success('Profile updated successfully!');
-      // Optionally, re-fetch user data to update AuthContext state
-      // This would involve calling an update function on useAuth context
-      // For now, reload to ensure context is updated
+      toast.success('Profile updated successfully!'); // Used react-hot-toast
+      // A more robust app might dispatch an action to update user in AuthContext
+      // For now, a simple reload to ensure context is updated
       window.location.reload();
     } catch (err) {
       console.error('Error updating profile:', err);
-      toast.error(err.response?.data?.error || 'Failed to update profile.');
+      toast.error(err.response?.data?.error || 'Failed to update profile.'); // Used react-hot-toast
     } finally {
       setLoading(false);
     }
@@ -86,25 +84,21 @@ const ProfilePage = () => {
   const handleSubmitPasswordUpdate = async (e) => {
     e.preventDefault();
     if (!validateForm(true)) { // Validate specifically for password update
-      toast.error('Please fix the password errors.');
+      toast.error('Please fix the password errors.'); // Used react-hot-toast
       return;
     }
 
     setLoading(true);
     try {
-      // For a real app, create a separate backend endpoint for password update that validates current password
-      // For this example, we'll send it to the same updateUser endpoint assuming it handles password hashing.
-      // NOTE: A more secure approach is a dedicated /auth/change-password endpoint.
       await api.put(`/users/${user._id}`, {
         password: formData.newPassword,
-        currentPassword: formData.currentPassword // This would be verified by backend
+        currentPassword: formData.currentPassword // Backend verifies this
       });
-      toast.success('Password updated successfully! Please log in again.');
+      toast.success('Password updated successfully! Please log in again.'); // Used react-hot-toast
       logout(); // Force logout after password change for security
-      // navigate('/login'); // Redirect is handled by logout in AuthContext already
     } catch (err) {
       console.error('Error updating password:', err);
-      toast.error(err.response?.data?.error || 'Failed to update password. Check your current password.');
+      toast.error(err.response?.data?.error || 'Failed to update password. Check your current password.'); // Used react-hot-toast
     } finally {
       setLoading(false);
     }
@@ -113,7 +107,7 @@ const ProfilePage = () => {
 
   if (authLoading || !user) {
     return (
-      <div className="flex justify-center items-center min-h-[calc(100vh-80px)]">
+      <div className="flex justify-center items-center flex-1 py-12 min-h-[400px]">
         <LoadingSpinner size="lg" />
         <p className="ml-3 text-lg text-gray-700">Loading profile...</p>
       </div>
@@ -121,18 +115,26 @@ const ProfilePage = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 bg-white rounded-lg shadow-xl my-8">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">My Profile</h1>
-
+    // Main container: Removed shadow-xl, added border, adjusted padding for consistency
+    <div className="max-w-4xl container p-8 bg-white rounded-lg border border-gray-200">
+      {/* User Information Section */}
       <div className="mb-8 p-4 bg-blue-50 rounded-md border border-blue-200">
-        <h2 className="text-xl font-semibold text-blue-800 mb-2">User Information</h2>
-        <p><strong>Role:</strong> <span className="capitalize">{user.role}</span></p>
-        <p><strong>Member Since:</strong> {moment(user.createdAt).format('LLL')}</p>
-        <p><strong>Last Updated:</strong> {moment(user.updatedAt).fromNow()}</p>
+        <h2 className="text-xl font-semibold text-gray-800 mb-2">User Information</h2> {/* Removed blue-800 from H2 */}
+        <p className="text-gray-700">
+          <span className="font-medium">Role:</span> <span className="capitalize">{user.role}</span>
+        </p>
+        <p className="text-gray-700">
+          <span className="font-medium">Member Since:</span> {moment(user.createdAt).format('LLL')}
+        </p>
+        <p className="text-gray-700">
+          <span className="font-medium">Last Updated:</span> {moment(user.updatedAt).fromNow()}
+        </p>
       </div>
 
-      <h2 className="text-2xl font-semibold text-gray-800 mb-4">Edit Profile</h2>
-      <form onSubmit={handleSubmitProfileUpdate} className="mb-8 border-b pb-8">
+      {/* Edit Profile Section */}
+      {/* Section Title: Smaller font, font-medium, border-bottom */}
+      <h2 className="text-xl font-medium text-gray-700 mb-6 border-b border-gray-200 pb-2">Edit Profile</h2>
+      <form onSubmit={handleSubmitProfileUpdate} className="mb-8 pb-8"> {/* Removed border-b as the h2 provides it */}
         <Input
           label="Username"
           type="text"
@@ -155,10 +157,11 @@ const ProfilePage = () => {
           error={errors.email}
         />
 
+        {/* Save Profile Button: Blue themed, font-medium */}
         <Button
           type="submit"
           disabled={loading}
-          className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded transition-colors duration-200 mt-4 flex items-center justify-center"
+          className="bg-[#504ee2] hover:bg-[#433ed1] text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 mt-4 flex items-center justify-center"
         >
           {loading ? (
             <>
@@ -171,7 +174,9 @@ const ProfilePage = () => {
         </Button>
       </form>
 
-      <h2 className="text-2xl font-semibold text-gray-800 mb-4">Change Password</h2>
+      {/* Change Password Section */}
+      {/* Section Title: Smaller font, font-medium, border-bottom */}
+      <h2 className="text-xl font-medium text-gray-700 mb-6 border-b border-gray-200 pb-2">Change Password</h2>
       <form onSubmit={handleSubmitPasswordUpdate}>
         <Input
           label="Current Password"
@@ -203,10 +208,11 @@ const ProfilePage = () => {
           required
           error={errors.confirmNewPassword}
         />
+        {/* Change Password Button: Orange themed, font-medium */}
         <Button
           type="submit"
           disabled={loading}
-          className="bg-orange-600 hover:bg-orange-700 text-white py-2 px-4 rounded transition-colors duration-200 mt-4 flex items-center justify-center"
+          className="bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 mt-4 flex items-center justify-center"
         >
           {loading ? (
             <>

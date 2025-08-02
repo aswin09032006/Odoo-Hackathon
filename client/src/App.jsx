@@ -6,7 +6,7 @@
 
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth'; // Custom hook for authentication context
-import Header from './components/Layout/Header'; // Global header component
+import Sidebar from './components/Layout/Sidebar'; // New Sidebar component
 import LoadingSpinner from './components/Common/LoadingSpinner'; // For initial loading screen
 
 // --- Page Components ---
@@ -32,7 +32,7 @@ const ProtectedRoute = ({ children, roles }) => {
   // Show a loading spinner while authentication status is being determined
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-[calc(100vh-80px)]">
+      <div className="flex flex-col justify-center items-center flex-1">
         <LoadingSpinner size="lg" />
         <p className="ml-3 text-lg text-gray-700">Checking authentication...</p>
       </div>
@@ -57,71 +57,78 @@ const ProtectedRoute = ({ children, roles }) => {
 function App() {
   return (
     <Router>
-      <Header /> {/* Header is always visible */}
-      <main className="min-h-[calc(100vh-80px)] bg-gray-100"> {/* Min height to push footer down */}
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/" element={<Navigate to="/dashboard" replace />} /> {/* Default redirect */}
+      {/*
+        CRITICAL CHANGE HERE:
+        - `h-screen`: Makes this container exactly 100% of the viewport height.
+        - `overflow-hidden`: Prevents *this container itself* from scrolling,
+                             forcing its flex children (sidebar and main) to manage their own overflows.
+      */}
+      <div className="flex h-screen bg-gray-100 overflow-hidden">
+        <Sidebar /> {/* Sidebar already has h-screen, which is good */}
+        <main className="flex-1 flex flex-col overflow-x-hidden overflow-y-auto py-8"> {/* Main content area */}
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/" element={<Navigate to="/dashboard" replace />} /> {/* Default redirect */}
 
-          {/* Protected Routes - Accessible to all authenticated users */}
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute> {/* No specific roles means any authenticated user */}
-                <DashboardPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/tickets/new"
-            element={
-              <ProtectedRoute>
-                <TicketCreatePage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/tickets/:id"
-            element={
-              <ProtectedRoute>
-                <TicketDetailPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <ProfilePage />
-              </ProtectedRoute>
-            }
-          />
+            {/* Protected Routes - Accessible to all authenticated users */}
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <DashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/tickets/new"
+              element={
+                <ProtectedRoute>
+                  <TicketCreatePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/tickets/:id"
+              element={
+                <ProtectedRoute>
+                  <TicketDetailPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              }
+            />
 
-          {/* Admin Specific Protected Routes */}
-          <Route
-            path="/admin/users"
-            element={
-              <ProtectedRoute roles={['admin']}>
-                <UserManagement />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/categories"
-            element={
-              <ProtectedRoute roles={['admin']}>
-                <CategoryManagement />
-              </ProtectedRoute>
-            }
-          />
+            {/* Admin Specific Protected Routes */}
+            <Route
+              path="/admin/users"
+              element={
+                <ProtectedRoute roles={['admin']}>
+                  <UserManagement />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/categories"
+              element={
+                <ProtectedRoute roles={['admin']}>
+                  <CategoryManagement />
+                </ProtectedRoute>
+              }
+            />
 
-          {/* Catch-all route for 404 Not Found */}
-          <Route path="*" element={<div className="text-center text-3xl font-bold text-gray-700 py-20">404 - Page Not Found</div>} />
-        </Routes>
-      </main>
-      {/* Optional: Add a Footer component here if needed */}
+            {/* Catch-all route for 404 Not Found */}
+            <Route path="*" element={<div className="text-center text-3xl font-bold text-gray-700 py-20">404 - Page Not Found</div>} />
+          </Routes>
+        </main>
+      </div>
     </Router>
   );
 }

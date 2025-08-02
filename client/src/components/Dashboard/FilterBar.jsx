@@ -6,8 +6,10 @@
 import React, { useState, useEffect } from 'react';
 import Input from '../Common/Input';
 import Button from '../Common/Button';
+import Toggle from '../Common/Toggle'; // Import the new Toggle component
 import api from '../../api'; // For fetching categories
 import { useAuth } from '../../hooks/useAuth'; // To determine user role
+import clsx from 'clsx'; // Import clsx
 
 /**
  * FilterBar component provides options to filter and sort tickets.
@@ -52,16 +54,19 @@ const FilterBar = ({ filters, onFiltersChange, searchQuery, onSearchChange, sort
   };
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow-md mb-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div className="bg-white p-6 rounded-lg border border-gray-200 mb-8">
+      {/* Changed md:items-end to md:items-start for consistent top alignment of labels */}
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         {/* Search Input */}
-        <div className="w-full md:w-1/3">
+        <div className="w-full md:w-1/3"> {/* Search input takes roughly 1/3 of the space */}
+          <label htmlFor="search" className="block text-gray-700 text-sm font-medium mb-2">Search:</label>
           <Input
+            id="search"
             type="text"
-            placeholder="Search tickets by subject or description..."
+            placeholder="Subject or description..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full"
+            className="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:border-[#504ee2] focus:ring-1 focus:ring-[#504ee2]"
           />
         </div>
 
@@ -69,23 +74,24 @@ const FilterBar = ({ filters, onFiltersChange, searchQuery, onSearchChange, sort
         <div className="md:hidden w-full">
           <Button
             onClick={() => setShowFilters(!showFilters)}
-            className="w-full bg-gray-200 text-gray-800 hover:bg-gray-300"
+            className="w-full bg-[#504ee2] hover:bg-[#433ed1] text-white py-2 px-4 rounded-md text-sm"
           >
             {showFilters ? 'Hide Filters' : 'Show Filters'}
           </Button>
         </div>
 
         {/* Filter and Sort Options (conditionally rendered for smaller screens) */}
-        <div className={`w-full md:flex md:flex-row md:flex-grow gap-4 ${showFilters ? 'block' : 'hidden md:flex'}`}>
+        {/* md:flex-grow takes the remaining 2/3 space. Items inside use md:flex-1 to distribute evenly. */}
+        <div className={clsx(`w-full md:flex md:flex-row md:flex-grow gap-4`, showFilters ? 'block' : 'hidden md:flex')}>
           {/* Status Filter */}
-          <div className="w-full md:w-1/4">
-            <label htmlFor="status" className="block text-gray-700 text-sm font-bold mb-2">Status:</label>
+          <div className="w-full md:flex-1"> {/* Changed md:w-1/4 to md:flex-1 */}
+            <label htmlFor="status" className="block text-gray-700 text-sm font-medium mb-2">Status:</label>
             <select
               id="status"
               name="status"
               value={filters.status || ''}
               onChange={handleFilterChange}
-              className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 focus:outline-none focus:border-[#504ee2] focus:ring-1 focus:ring-[#504ee2]"
             >
               <option value="">All Statuses</option>
               <option value="Open">Open</option>
@@ -96,14 +102,14 @@ const FilterBar = ({ filters, onFiltersChange, searchQuery, onSearchChange, sort
           </div>
 
           {/* Category Filter */}
-          <div className="w-full md:w-1/4">
-            <label htmlFor="category" className="block text-gray-700 text-sm font-bold mb-2">Category:</label>
+          <div className="w-full md:flex-1"> {/* Changed md:w-1/4 to md:flex-1 */}
+            <label htmlFor="category" className="block text-gray-700 text-sm font-medium mb-2">Category:</label>
             <select
               id="category"
               name="category"
               value={filters.category || ''}
               onChange={handleFilterChange}
-              className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 focus:outline-none focus:border-[#504ee2] focus:ring-1 focus:ring-[#504ee2]"
               disabled={loadingCategories}
             >
               <option value="">All Categories</option>
@@ -120,14 +126,14 @@ const FilterBar = ({ filters, onFiltersChange, searchQuery, onSearchChange, sort
           </div>
 
           {/* Sort By */}
-          <div className="w-full md:w-1/4">
-            <label htmlFor="sort" className="block text-gray-700 text-sm font-bold mb-2">Sort By:</label>
+          <div className="w-full md:flex-1"> {/* Changed md:w-1/4 to md:flex-1 */}
+            <label htmlFor="sort" className="block text-gray-700 text-sm font-medium mb-2">Sort By:</label>
             <select
               id="sort"
               name="sort"
               value={sortBy}
               onChange={(e) => onSortChange(e.target.value)}
-              className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 focus:outline-none focus:border-[#504ee2] focus:ring-1 focus:ring-[#504ee2]"
             >
               <option value="-createdAt">Newest First</option>
               <option value="createdAt">Oldest First</option>
@@ -139,27 +145,22 @@ const FilterBar = ({ filters, onFiltersChange, searchQuery, onSearchChange, sort
 
           {/* "My Tickets" Toggle for Support Agents */}
           {showMyTicketsToggle && (user?.role === 'support-agent' || user?.role === 'admin') && (
-            <div className="w-full md:w-auto flex items-end">
-              <label htmlFor="my_tickets" className="flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  id="my_tickets"
-                  name="my_tickets"
-                  checked={filters.my_tickets === 'true'}
-                  onChange={(e) => onFiltersChange({ ...filters, my_tickets: e.target.checked ? 'true' : undefined })}
-                  className="mr-2 h-4 w-4 text-blue-600 rounded focus:ring-blue-500"
-                />
-                <span className="text-gray-700 text-sm font-bold">My Assigned Tickets</span>
-              </label>
+            <div className="w-full md:flex-1 flex items-end justify-center md:justify-start pt-6 md:pt-0"> {/* Changed md:w-auto to md:flex-1 */}
+              <Toggle
+                id="my_tickets"
+                label="My Assigned Tickets"
+                checked={filters.my_tickets === 'true'}
+                onChange={(e) => onFiltersChange({ ...filters, my_tickets: e.target.checked ? 'true' : undefined })}
+              />
             </div>
           )}
         </div>
       </div>
       {/* Clear Filters Button */}
-      <div className="mt-4 text-right">
+      <div className="mt-6 text-right">
         <Button
           onClick={handleClearFilters}
-          className="bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded text-sm"
+          className="border border-gray-300 text-gray-700 hover:bg-gray-100 py-2 px-4 rounded-md text-sm"
         >
           Clear Filters
         </Button>

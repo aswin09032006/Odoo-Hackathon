@@ -6,6 +6,7 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 import Button from './Button';
+import { X } from 'lucide-react'; // Import X icon from lucide-react
 
 /**
  * A reusable Modal component.
@@ -36,12 +37,10 @@ const Modal = ({ show, onClose, title, children }) => {
           </h2>
           <Button
             onClick={onClose}
-            className="bg-transparent hover:bg-gray-200 text-gray-500 hover:text-gray-700 p-1 rounded-full"
+            className="bg-transparent hover:bg-gray-100 text-gray-500 hover:text-gray-700 p-2 rounded-full" // Adjusted padding and hover state
             aria-label="Close modal"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
+            <X size={20} /> {/* Use Lucide X icon */}
           </Button>
         </div>
 

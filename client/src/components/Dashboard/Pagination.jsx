@@ -5,6 +5,7 @@
 
 import React from 'react';
 import Button from '../Common/Button';
+import clsx from 'clsx'; // Import clsx
 
 /**
  * Pagination component displays navigation buttons for pages.
@@ -24,17 +25,21 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
     startPage = Math.max(1, endPage - maxPagesToShow + 1);
   }
 
+  // Ensure totalPages is at least 1, even if no tickets
+  const safeTotalPages = Math.max(1, totalPages);
+
   for (let i = startPage; i <= endPage; i++) {
     pages.push(i);
   }
 
   return (
-    <div className="flex justify-center items-center space-x-2 mt-8">
+    <div className="flex justify-center items-center space-x-2 mt-10 text-sm"> {/* Increased margin, reduced font size */}
       {/* Previous button */}
       <Button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-3 py-1 rounded"
+        // Styled as an outline button, with subtle disabled state
+        className="border border-gray-300 text-gray-700 px-3 py-1 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
       >
         Prev
       </Button>
@@ -42,8 +47,8 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
       {/* Page numbers */}
       {startPage > 1 && (
         <>
-          <Button onClick={() => onPageChange(1)} className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-3 py-1 rounded">1</Button>
-          {startPage > 2 && <span className="text-gray-600">...</span>}
+          <Button onClick={() => onPageChange(1)} className="border border-gray-300 text-gray-700 px-3 py-1 rounded-md hover:bg-gray-100">1</Button>
+          {startPage > 2 && <span className="text-gray-600 px-1">...</span>} {/* Added horizontal padding */}
         </>
       )}
 
@@ -51,24 +56,29 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
         <Button
           key={page}
           onClick={() => onPageChange(page)}
-          className={`px-3 py-1 rounded ${currentPage === page ? 'bg-blue-600 text-white' : 'bg-gray-300 hover:bg-gray-400 text-gray-800'}`}
+          className={clsx(
+            "px-3 py-1 rounded-md transition-colors duration-200", // Added transition
+            // Active page: blue background, white text
+            currentPage === page ? 'bg-[#504ee2] text-white' : 'border border-gray-300 text-gray-700 hover:bg-gray-100'
+          )}
         >
           {page}
         </Button>
       ))}
 
-      {endPage < totalPages && (
+      {endPage < safeTotalPages && (
         <>
-          {endPage < totalPages - 1 && <span className="text-gray-600">...</span>}
-          <Button onClick={() => onPageChange(totalPages)} className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-3 py-1 rounded">{totalPages}</Button>
+          {endPage < safeTotalPages - 1 && <span className="text-gray-600 px-1">...</span>} {/* Added horizontal padding */}
+          <Button onClick={() => onPageChange(safeTotalPages)} className="border border-gray-300 text-gray-700 px-3 py-1 rounded-md hover:bg-gray-100">{safeTotalPages}</Button>
         </>
       )}
 
       {/* Next button */}
       <Button
         onClick={() => onPageChange(currentPage + 1)}
-        disabled={currentPage === totalPages || totalPages === 0}
-        className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-3 py-1 rounded"
+        disabled={currentPage === safeTotalPages || safeTotalPages === 0}
+        // Styled as an outline button, with subtle disabled state
+        className="border border-gray-300 text-gray-700 px-3 py-1 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
       >
         Next
       </Button>
