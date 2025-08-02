@@ -1,0 +1,43 @@
+/*
+ * @file index.css
+ * @description Global CSS for the QuickDesk frontend.
+ *              Includes Tailwind CSS directives for utility-first styling.
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom base styles if needed, e.g., font-families, background colors */
+body {
+  font-family: 'Inter', sans-serif; /* Example: use a specific font */
+  background-color: #f4f7f6; /* Light gray background */
+  color: #333;
+}
+
+/* Container for consistent page width */
+.container {
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem; /* Equivalent to px-4 in Tailwind */
+  padding-right: 1rem; /* Equivalent to px-4 in Tailwind */
+}
+
+/* Simple scrollbar styling (optional) */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

@@ -1,0 +1,34 @@
+# dependencies
+/node_modules
+
+# testing
+/coverage
+
+# production
+/dist
+/build
+
+# local .env files
+.env
+.env.*.local
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.bak
+
+# Vite-specific build cache
+.vite/
+
+# Other temporary files
+*.tmp
