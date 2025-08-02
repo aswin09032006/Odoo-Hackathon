@@ -5,7 +5,6 @@
 
 import moment from 'moment';
 import { useEffect, useState } from 'react';
-// import { toast } from 'react-toastify'; // Removed react-toastify
 import toast from 'react-hot-toast'; // Added react-hot-toast
 import api from '../../api';
 import Button from '../../components/Common/Button';
@@ -68,7 +67,7 @@ const UserManagement = () => {
 
     if (!isEditing && !formData.password.trim()) newErrors.password = 'Password is required.';
     if (formData.password && formData.password.trim().length < 6) newErrors.password = 'Password must be at least 6 characters.';
-    
+
     setFormErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -153,7 +152,7 @@ const UserManagement = () => {
 
   if (loading && users.length === 0) {
     return (
-      <div className="flex justify-center items-center flex-1"> {/* Adjusted for new layout */}
+      <div className="flex justify-center items-center flex-1 py-12 min-h-[400px]">
         <LoadingSpinner size="lg" />
         <p className="ml-3 text-lg text-gray-700">Loading users...</p>
       </div>
@@ -161,44 +160,50 @@ const UserManagement = () => {
   }
 
   if (error) {
-    return <div className="text-center text-red-500 text-lg mt-8">{error}</div>;
+    return <div className="text-center text-red-500 text-lg py-12 mt-8">{error}</div>;
   }
 
   return (
-    <div className="container mx-auto p-6 bg-white rounded-lg shadow-xl"> {/* Consistent container styling */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">User Management</h1>
-        <Button onClick={handleCreateClick} className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md"> {/* Changed rounded to rounded-md */}
+    // Main container: Consistent styling
+    <div className="container mx-auto p-8 bg-white rounded-lg border border-gray-200">
+      <div className="flex justify-between items-center mb-6 border-b border-gray-200 pb-4"> {/* Added border-b for header separation */}
+        {/* Page Title: Consistent styling */}
+        <h1 className="text-xl font-semibold uppercase tracking-wide text-[#504ee2]">User Management</h1>
+        {/* Add New User Button: Consistent blue theme, font-medium */}
+        <Button onClick={handleCreateClick} className="bg-[#504ee2] hover:bg-[#433ed1] text-white font-medium px-5 py-2 rounded-md">
           Add New User
         </Button>
       </div>
 
       {users.length === 0 ? (
-        <p className="text-center text-gray-600 text-xl py-10">No users found.</p>
+        <p className="text-center text-gray-600 text-lg py-10">No users found.</p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="min-w-full bg-white border border-gray-200 rounded-lg overflow-hidden"> {/* Added overflow-hidden for rounded corners */}
+          {/* Table: Removed shadow, added border and rounded-lg for consistency */}
+          <table className="min-w-full bg-white border border-gray-200 rounded-lg overflow-hidden">
             <thead>
-              <tr className="bg-gray-100 text-left text-sm text-gray-600 uppercase tracking-wider">
-                <th className="py-3 px-4 border-b border-gray-200">Username</th>
-                <th className="py-3 px-4 border-b border-gray-200">Email</th>
-                <th className="py-3 px-4 border-b border-gray-200">Role</th>
-                <th className="py-3 px-4 border-b border-gray-200">Created At</th>
-                <th className="py-3 px-4 border-b border-gray-200 text-center">Actions</th>
+              <tr className="bg-gray-50 text-left text-sm text-gray-600 uppercase tracking-wider"> {/* Lighter header background */}
+                <th className="py-3 px-4 border-b border-gray-200 font-medium">Username</th> {/* Font-medium */}
+                <th className="py-3 px-4 border-b border-gray-200 font-medium">Email</th> {/* Font-medium */}
+                <th className="py-3 px-4 border-b border-gray-200 font-medium">Role</th> {/* Font-medium */}
+                <th className="py-3 px-4 border-b border-gray-200 font-medium">Created At</th> {/* Font-medium */}
+                <th className="py-3 px-4 border-b border-gray-200 text-center font-medium">Actions</th> {/* Font-medium */}
               </tr>
             </thead>
             <tbody>
               {users.map((user) => (
-                <tr key={user._id} className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50"> {/* Changed border-gray-200 to border-gray-100, and last:border-b-0 */}
+                <tr key={user._id} className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50 text-gray-700"> {/* Softer border, text-gray-700 */}
                   <td className="py-3 px-4">{user.username}</td>
                   <td className="py-3 px-4">{user.email}</td>
                   <td className="py-3 px-4 capitalize">{user.role}</td>
                   <td className="py-3 px-4">{moment(user.createdAt).format('YYYY-MM-DD')}</td>
                   <td className="py-3 px-4 text-center">
-                    <Button onClick={() => handleEditClick(user)} className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-md text-sm mr-2"> {/* Changed rounded to rounded-md */}
+                    {/* Edit Button: Softer yellow, font-medium, rounded-md */}
+                    <Button onClick={() => handleEditClick(user)} className="bg-yellow-50 text-yellow-700 hover:bg-yellow-100 border border-yellow-200 px-3 py-1 rounded-md text-sm mr-2 font-medium">
                       Edit
                     </Button>
-                    <Button onClick={() => handleDelete(user._id)} className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm"> {/* Changed rounded to rounded-md */}
+                    {/* Delete Button: Softer red, font-medium, rounded-md */}
+                    <Button onClick={() => handleDelete(user._id)} className="bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 px-3 py-1 rounded-md text-sm font-medium">
                       Delete
                     </Button>
                   </td>
@@ -206,12 +211,21 @@ const UserManagement = () => {
               ))}
             </tbody>
           </table>
+          {/* Loading overlay for table */}
+          {loading && users.length > 0 && (
+            <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10">
+              <LoadingSpinner size="md" />
+            </div>
+          )}
         </div>
       )}
 
       {/* User Create/Edit Modal */}
       <Modal show={showModal} onClose={() => setShowModal(false)} title={isEditing ? 'Edit User' : 'Add New User'}>
         <form onSubmit={handleSubmit}>
+          {/* Modal Title inside modal content (if Modal component doesn't handle it with the main title prop) */}
+          <h2 className="text-xl font-semibold uppercase tracking-wide text-[#504ee2] mb-6 text-center">{isEditing ? 'Edit User' : 'Add New User'}</h2>
+
           <Input
             label="Username"
             type="text"
@@ -220,6 +234,7 @@ const UserManagement = () => {
             onChange={handleChange}
             required
             error={formErrors.username}
+            // Assuming Input component handles its own styling internally
           />
           <Input
             label="Email"
@@ -229,6 +244,7 @@ const UserManagement = () => {
             onChange={handleChange}
             required
             error={formErrors.email}
+            // Assuming Input component handles its own styling internally
           />
           <Input
             label={isEditing ? 'New Password (optional)' : 'Password'}
@@ -238,15 +254,16 @@ const UserManagement = () => {
             onChange={handleChange}
             required={!isEditing}
             error={formErrors.password}
+            // Assuming Input component handles its own styling internally
           />
           <div className="mb-4">
-            <label htmlFor="role" className="block text-gray-700 text-sm font-semibold mb-2">Role:</label> {/* Changed font-bold to font-semibold */}
+            <label htmlFor="role" className="block text-gray-700 text-sm font-medium mb-2">Role:</label> {/* Font-medium */}
             <select
               id="role"
               name="role"
               value={formData.role}
               onChange={handleChange}
-              className="shadow border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-blue-500 focus:border-blue-500" // Updated styles
+              className="border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#504ee2] focus:border-[#504ee2]" // Updated styles, removed shadow
             >
               {roles.map(role => (
                 <option key={role} value={role} className="capitalize">{role}</option>
@@ -254,10 +271,12 @@ const UserManagement = () => {
             </select>
           </div>
           <div className="flex justify-end gap-3 mt-6">
-            <Button type="button" onClick={() => setShowModal(false)} className="bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-md"> {/* Changed rounded to rounded-md */}
+            {/* Cancel Button: Outline style, font-medium */}
+            <Button type="button" onClick={() => setShowModal(false)} className="border border-gray-300 text-gray-700 hover:bg-gray-100 rounded-md font-medium">
               Cancel
             </Button>
-            <Button type="submit" disabled={loading} className="bg-blue-600 hover:bg-blue-700 text-white rounded-md"> {/* Changed rounded to rounded-md */}
+            {/* Submit Button: Blue themed, font-medium */}
+            <Button type="submit" disabled={loading} className="bg-[#504ee2] hover:bg-[#433ed1] text-white rounded-md font-medium">
               {loading ? <LoadingSpinner size="sm" color="white" /> : (isEditing ? 'Save Changes' : 'Create User')}
             </Button>
           </div>
