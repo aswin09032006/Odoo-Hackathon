@@ -60,6 +60,50 @@ QuickDesk supports three main user roles, each with specific permissions:
     *   All functionalities of a Support Agent.
     *   View profile and settings.
 
+## Project Structure
+
+```
+QuickDesk/
+├── client/
+│   ├── public/
+│   ├── src/
+│   │   ├── api/
+│   │   ├── assets/
+│   │   ├── components/
+│   │   │   ├── Auth/
+│   │   │   ├── Common/
+│   │   │   ├── Dashboard/
+│   │   │   ├── Layout/
+│   │   │   └── TicketDetail/
+│   │   ├── context/
+│   │   ├── hooks/
+│   │   ├── pages/
+│   │   │   ├── Admin/
+│   │   │   ├── Auth/
+│   │   ├── utils/
+│   │   ├── App.jsx
+│   │   ├── index.css
+│   │   └── main.jsx
+│   ├── package.json
+│   ├── vite.config.js
+│   ├── tailwind.config.js
+│   └── ...
+├── server/
+│   ├── config/
+│   ├── controllers/
+│   ├── middleware/
+│   ├── models/
+│   ├── routes/
+│   ├── services/
+│   ├── uploads/
+│   ├── utils/
+│   ├── app.js
+│   ├── server.js
+│   └── package.json
+├── README.md
+└── ...
+```
+
 ## Technology Stack
 
 -   **Frontend:** React.js (with Vite for fast development)
@@ -99,10 +143,25 @@ Follow these steps to get QuickDesk up and running on your local machine.
     ```bash
     cp .env.example .env
     ```
-    Open the newly created `.env` file and fill in your details:
-    -   `MONGO_URI`: Your MongoDB connection string. For local MongoDB, it might be `mongodb://127.0.0.1:27017/quickdesk_db`.
-    -   `JWT_SECRET`: A strong, random string for JWT signing.
-    -   `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USER`, `EMAIL_PASS`: Your SMTP credentials for sending emails (e.g., from Mailtrap for development).
+    Open the newly created `.env` file and fill in your details. Required variables:
+    
+    ```env
+    # MongoDB connection string
+    MONGO_URI=mongodb://127.0.0.1:27017/quickdesk_db
+
+    # JWT secret for authentication
+    JWT_SECRET=your_jwt_secret_here
+
+    # SMTP configuration for email notifications
+    EMAIL_HOST=smtp.example.com
+    EMAIL_PORT=587
+    EMAIL_USER=your_email_username
+    EMAIL_PASS=your_email_password
+
+    # (Optional) Other environment variables
+    NODE_ENV=development
+    PORT=5000
+    ```
 4.  **Create `uploads` directory:**
     Multer needs a place to store uploaded files. Create this directory:
     ```bash
@@ -125,9 +184,15 @@ Follow these steps to get QuickDesk up and running on your local machine.
     ```bash
     cp .env.example .env
     ```
-    Open the `.env` file and set the backend API base URL:
-    ```
+    Open the `.env` file and set the required variables:
+    
+    ```env
+    # Base URL for backend API
     VITE_API_BASE_URL=http://localhost:5000/api
+
+    # (Optional) Other environment variables for client
+    VITE_APP_NAME=QuickDesk
+    VITE_FEATURE_FLAG=true
     ```
 
 ### Running the Application
