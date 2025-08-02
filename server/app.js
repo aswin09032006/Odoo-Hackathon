@@ -19,6 +19,7 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const ticketRoutes = require('./routes/ticketRoutes');
+const chatRoutes = require('./routes/chatRoutes'); // <--- ADD THIS LINE to import chat routes
 
 const app = express();
 
@@ -41,6 +42,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/tickets', ticketRoutes);
++app.use('/api/chat', chatRoutes); // <--- ADD THIS LINE to mount chat routes
 
 // Error handling middleware (should be last)
 app.use(errorHandler);

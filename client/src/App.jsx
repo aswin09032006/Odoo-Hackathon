@@ -22,7 +22,7 @@ import UserManagement from './pages/Admin/UserManagement';
 import CategoryManagement from './pages/Admin/CategoryManagement';
 
 // --- IMPORT THE CHATBOT COMPONENT ---
-import Chatbot from './components/Chatbot'; // Correct path to your component
+import Chatbot from './components/Chatbot';
 
 const ProtectedRoute = ({ children, roles }) => {
   const { user, isAuthenticated, loading } = useAuth();
@@ -50,7 +50,6 @@ const AppLayout = () => {
   const isMobile = width < 768;
 
   const noSidebarPaths = ['/login', '/register'];
-  // This is a great proxy for being authenticated
   const showNav = !noSidebarPaths.includes(location.pathname) && isAuthenticated;
 
   const AppRoutes = (
@@ -102,10 +101,15 @@ const AppLayout = () => {
 
       {/* 
         ADD THE CHATBOT HERE
-        It is placed outside the mobile/desktop layout blocks so it works on both.
-        The `showNav` check ensures it only appears when the user is logged in.
+        Wrapped Chatbot in a div that applies the fixed positioning.
+        The Chatbot component itself is now responsible only for its internal layout
+        (modal and toggle button positions relative to each other).
       */}
-      {showNav && <Chatbot />}
+      {showNav && (
+          <div className="fixed bottom-5 right-5 z-50"> {/* Applied positioning here */}
+              <Chatbot />
+          </div>
+      )}
     </div>
   );
 };

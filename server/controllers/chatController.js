@@ -27,18 +27,18 @@ exports.getChatCompletion = async (req, res) => {
     }
 
     try {
-        // Step 1: Intent Recognition using Groq
+        // Step 1: Intent Recognition using Groq (NLU)
         const intent = await determineUserIntent(message);
 
         let responseMessage;
 
-        // Step 2: Act on the recognized intent
+        // Step 2: Act on the recognized intent and generate response (NLG)
         switch (intent.action) {
             case 'get_tickets':
                 responseMessage = await handleGetTickets(intent.params, userId, userRole);
                 break;
             case 'get_user_info':
-                responseMessage = await handleGetUserInfo(intent.params, userRole);
+                responseMessage = await handleGetUserInfo(intent.params, userId, userRole);
                 break;
             case 'get_categories':
                 responseMessage = await handleGetCategories();
@@ -51,35 +51,38 @@ exports.getChatCompletion = async (req, res) => {
 
     } catch (error) {
         console.error('Chat Controller Error:', error);
-        res.status(500).json({ success: false, error: 'Internal Server Error' });
+        res.status(500).json({ success: false, error: 'I apologize, but I encountered an internal error. Please try again later.' });
     }
 };
 
 /**
  * Uses Groq to determine the user's intent from their message.
+ * This function is core to the NLU (Natural Language Understanding) part.
  */
 async function determineUserIntent(userMessage) {
     const systemPrompt = `
         You are an AI assistant for a helpdesk application called QuickDesk.
-        Your task is to analyze the user's message and determine their intent.
-        Respond with a JSON object only, with two keys: "action" and "params".
+        Your primary task is to understand the user's request and categorize it into specific actions.
+        You must respond with a JSON object only. Respond directly with the JSON. Do not include any other text.
 
-        Possible values for "action":
-        - "get_tickets": If the user is asking to see their support tickets.
-        - "get_user_info": If the user is asking for details about a specific user.
-        - "get_categories": If the user is asking about available ticket categories.
-        - "general_query": For any other question or general conversation.
+        The JSON object should have two keys: "action" and "params".
 
-        For "params", extract relevant information.
-        - For "get_tickets", look for a status like 'Open', 'Closed', 'In Progress', 'Resolved'. If none, use 'all'.
-        - For "get_user_info", look for a username. If none, use 'null'.
+        "action" can be one of the following:
+        - "get_tickets": The user wants to retrieve information about support tickets.
+        - "get_user_info": The user is asking for details about a user account.
+        - "get_categories": The user is asking about available ticket categories.
+        - "general_query": Any request that doesn't fit the above categories (e.g., greetings, general questions).
 
-        Examples:
-        - User: "show me my open tickets" -> {"action": "get_tickets", "params": {"status": "Open"}}
-        - User: "what tickets are resolved?" -> {"action": "get_tickets", "params": {"status": "Resolved"}}
-        - User: "tell me about the user 'janesmith'" -> {"action": "get_user_info", "params": {"username": "janesmith"}}
-        - User: "what categories are there?" -> {"action": "get_categories", "params": {}}
-        - User: "hello how are you?" -> {"action": "general_query", "params": {}}
+        "params" should be a JSON object containing relevant parameters for the action.
+        - For "get_tickets":
+            - "status": (string, optional) Can be 'open', 'closed', 'in progress', 'resolved'. If not specified, use 'all'.
+            - "limit": (number, optional) The maximum number of tickets to retrieve. Default to 5 if not specified.
+        - For "get_user_info":
+            - "username": (string, optional) The username of the user to look up. If not specified, assume 'self' for the current user.
+        - For "get_categories": No specific parameters needed.
+        - For "general_query": No parameters needed.
+
+        Strictly output only the JSON object. Do not include any other text or formatting.
     `;
 
     const completion = await groq.chat.completions.create({
@@ -88,74 +91,134 @@ async function determineUserIntent(userMessage) {
             { role: 'user', content: userMessage }
         ],
         model: 'llama3-8b-8192',
-        temperature: 0,
+        temperature: 0, // Keep low for intent recognition
         response_format: { type: 'json_object' }
     });
 
-    return JSON.parse(completion.choices[0].message.content);
+    try {
+        const content = completion.choices[0].message.content;
+        // Sometimes Groq might add markdown around JSON, strip it
+        const jsonString = content.replace(/^```json\n|\n```$/g, '').trim();
+        return JSON.parse(jsonString);
+    } catch (e) {
+        console.error("Failed to parse intent JSON from Groq:", completion.choices[0].message.content, e);
+        return { action: 'general_query', params: {} };
+    }
 }
 
-// --- Intent Handling Functions ---
+// --- Intent Handling Functions (with NLG via Groq) ---
 
 async function handleGetTickets(params, userId, userRole) {
     let query = {};
+    const limit = params.limit ? parseInt(params.limit) : 5; // Default limit
 
-    // Security: Non-admins can only see their own tickets.
     if (userRole !== 'admin') {
         query.createdBy = userId;
     }
 
     if (params.status && params.status !== 'all') {
-        // Capitalize status to match schema enum ('Open', 'Closed', etc.)
-        query.status = params.status.charAt(0).toUpperCase() + params.status.slice(1);
+        query.status = params.status.split(' ').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
     }
 
-    const tickets = await Ticket.find(query).limit(10).sort({ createdAt: -1 });
+    const tickets = await Ticket.find(query).limit(limit).sort({ createdAt: -1 }).populate('category', 'name').populate('createdBy', 'username');
 
+    let groqPrompt;
     if (tickets.length === 0) {
-        return `I couldn't find any tickets matching that criteria.`;
+        groqPrompt = `The user asked for tickets with status "${params.status || 'all'}" for ${userRole === 'admin' ? 'all users' : 'their own account'}. No tickets were found matching this criteria. Respond concisely with this information.`;
+    } else {
+        const ticketData = tickets.map(t => ({
+            subject: t.subject,
+            status: t.status,
+            priority: t.priority,
+            category: t.category?.name || 'N/A',
+            createdBy: t.createdBy?.username || 'N/A',
+            createdAt: t.createdAt.toISOString()
+        }));
+        groqPrompt = `Here is ticket data in JSON: ${JSON.stringify(ticketData)}. Generate a very short, clear list of these tickets. Include only subject, status, and category for each. Add a brief intro like "Here are your tickets:" or "Found X tickets:".`;
     }
 
-    let response = `Here are the latest tickets I found:\n`;
-    tickets.forEach(t => {
-        response += `\n- **Subject:** ${t.subject}\n  - **Status:** ${t.status}\n  - **Priority:** ${t.priority}\n`;
+    const completion = await groq.chat.completions.create({
+        messages: [
+            { role: 'system', content: 'You are a concise QuickDesk assistant. Provide brief, clear summaries of ticket data. Avoid conversational filler or greetings beyond a short intro. Use bullet points for lists.' },
+            { role: 'user', content: groqPrompt }
+        ],
+        model: 'llama3-8b-8192',
+        temperature: 0.3, // Keep low for directness
     });
-    return response;
+    return completion.choices[0].message.content;
 }
 
-async function handleGetUserInfo(params, userRole) {
-    // Security: Only admins can look up other users.
-    if (userRole !== 'admin') {
-        return "Sorry, you don't have permission to look up user information.";
-    }
-    if (!params.username) {
-        return "Please specify a username to look up.";
+async function handleGetUserInfo(params, currentUserId, userRole) {
+    let targetUser;
+
+    if (params.username === 'self' || !params.username) {
+        targetUser = await User.findById(currentUserId).select('-password');
+    } else {
+        if (userRole !== 'admin') {
+            return "Sorry, you don't have permission to look up other user information.";
+        }
+        targetUser = await User.findOne({ username: params.username }).select('-password');
     }
 
-    const user = await User.findOne({ username: params.username }).select('-password');
-    if (!user) {
-        return `I couldn't find a user with the username '${params.username}'.`;
+    let groqPrompt;
+    if (!targetUser) {
+        groqPrompt = `The user asked for information about '${params.username}'. No such user was found. State this concisely.`;
+    } else {
+        const userData = {
+            username: targetUser.username,
+            email: targetUser.email,
+            role: targetUser.role,
+            memberSince: targetUser.createdAt.toDateString(),
+            // Only include lastLogin if it actually exists in your User model
+            // lastLogin: targetUser.lastLoginAt ? targetUser.lastLoginAt.toDateString() : 'N/A'
+        };
+        groqPrompt = `Here is user data in JSON: ${JSON.stringify(userData)}. Generate a very short, clear summary of this user's details. Include username, email, and role. Avoid extra details.`;
     }
 
-    return `Here is the information for user '${user.username}':\n- **Email:** ${user.email}\n- **Role:** ${user.role}\n- **Member Since:** ${user.createdAt.toDateString()}`;
+    const completion = await groq.chat.completions.create({
+        messages: [
+            { role: 'system', content: 'You are a concise QuickDesk assistant. Provide brief, clear user information. Avoid conversational filler or greetings. Be direct.' },
+            { role: 'user', content: groqPrompt }
+        ],
+        model: 'llama3-8b-8192',
+        temperature: 0.3,
+    });
+    return completion.choices[0].message.content;
 }
 
 async function handleGetCategories() {
-    const categories = await Category.find({}).select('name');
+    const categories = await Category.find({}).select('name description');
+
+    let groqPrompt;
     if (categories.length === 0) {
-        return "No ticket categories have been set up yet.";
+        groqPrompt = `The user asked for ticket categories. There are no categories configured. State this concisely.`;
+    } else {
+        const categoryData = categories.map(c => ({
+            name: c.name,
+            description: c.description || 'N/A' // Change 'No description available' to 'N/A' for brevity if no description
+        }));
+        groqPrompt = `Here is category data in JSON: ${JSON.stringify(categoryData)}. Generate a very short, clear list of these categories. Include name and description if available. Use bullet points.`;
     }
-    const categoryNames = categories.map(c => c.name).join(', ');
-    return `The available ticket categories are: ${categoryNames}.`;
+
+    const completion = await groq.chat.completions.create({
+        messages: [
+            { role: 'system', content: 'You are a concise QuickDesk assistant. Provide a brief, clear list of categories. Avoid conversational filler. Use bullet points.' },
+            { role: 'user', content: groqPrompt }
+        ],
+        model: 'llama3-8b-8192',
+        temperature: 0.3,
+    });
+    return completion.choices[0].message.content;
 }
 
 async function handleGeneralQuery(userMessage) {
     const completion = await groq.chat.completions.create({
         messages: [
-            { role: 'system', content: 'You are a helpful assistant named GroqBot.' },
+            { role: 'system', content: 'You are a helpful QuickDesk assistant named GroqBot. Respond concisely and professionally. If you cannot fulfill a request due to scope, politely and briefly state so. Avoid lengthy explanations or general knowledge beyond QuickDesk.' },
             { role: 'user', content: userMessage }
         ],
-        model: 'llama3-8b-8192'
+        model: 'llama3-8b-8192',
+        temperature: 0.5, // Slightly higher for general conversation, but still leaning towards directness
     });
     return completion.choices[0].message.content;
 }
