@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { PaperAirplaneIcon, ChatBubbleOvalLeftEllipsisIcon, XMarkIcon } from '@heroicons/react/24/solid';
 import MarkdownIt from 'markdown-it';
@@ -60,32 +59,32 @@ const Chatbot = () => {
         <div className="fixed bottom-5 right-5 z-50">
             {/* Chat Modal Window */}
             <div className={`transition-transform transition-opacity duration-300 ease-in-out ${isOpen ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0 pointer-events-none'}`}>
-                <div className="flex flex-col w-96 h-[600px] bg-white rounded-xl shadow-2xl border border-gray-200">
+                <div className="flex flex-col w-96 h-[600px] bg-white rounded-xl shadow-lg border border-gray-200"> {/* Adjusted shadow */}
                     {/* Header */}
-                    <div className="flex items-center justify-between p-4 bg-blue-600 text-white rounded-t-xl">
-                        <h3 className="text-lg font-semibold">GroqBot Assistant</h3>
-                        <button onClick={() => setIsOpen(false)} className="p-1 rounded-full hover:bg-blue-700">
+                    <div className="flex items-center justify-between p-4 bg-[#504ee2] text-white rounded-t-xl"> {/* Blue theme color */}
+                        <h3 className="text-lg font-medium">GroqBot Assistant</h3> {/* Reduced font weight */}
+                        <button onClick={() => setIsOpen(false)} className="p-1 rounded-full hover:bg-[#433ed1]"> {/* Darker blue on hover */}
                             <XMarkIcon className="w-6 h-6" />
                         </button>
                     </div>
 
                     {/* Messages */}
-                    <div ref={chatboxRef} className="flex-1 p-4 overflow-y-auto bg-gray-50 space-y-4">
+                    <div ref={chatboxRef} className="flex-1 p-4 overflow-y-auto bg-gray-50 space-y-3"> {/* Adjusted spacing */}
                         {messages.map((msg, index) => (
                             <div key={index} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                                 <div
-                                    className={`prose rounded-2xl px-4 py-2 max-w-xs text-black ${msg.sender === 'user' ? 'bg-blue-500 text-white rounded-br-none' : 'bg-gray-200 rounded-bl-none'}`}
+                                    className={`prose rounded-xl px-4 py-2 max-w-xs ${msg.sender === 'user' ? 'bg-[#504ee2] text-white rounded-br-none' : 'bg-gray-200 text-gray-800 rounded-bl-none'}`}
                                     dangerouslySetInnerHTML={{ __html: md.render(msg.text) }}
                                 />
                             </div>
                         ))}
                         {isLoading && (
                             <div className="flex justify-start">
-                                <div className="bg-gray-200 rounded-2xl px-4 py-2 rounded-bl-none">
+                                <div className="bg-gray-200 rounded-xl px-4 py-2 rounded-bl-none"> {/* Rounded-xl for consistency */}
                                     <div className="flex items-center space-x-1">
-                                        <div className="w-2 h-2 bg-gray-500 rounded-full animate-pulse"></div>
-                                        <div className="w-2 h-2 bg-gray-500 rounded-full animate-pulse [animation-delay:0.2s]"></div>
-                                        <div className="w-2 h-2 bg-gray-500 rounded-full animate-pulse [animation-delay:0.4s]"></div>
+                                        <div className="w-2 h-2 bg-gray-600 rounded-full animate-pulse"></div> {/* Darker gray dots */}
+                                        <div className="w-2 h-2 bg-gray-600 rounded-full animate-pulse [animation-delay:0.2s]"></div>
+                                        <div className="w-2 h-2 bg-gray-600 rounded-full animate-pulse [animation-delay:0.4s]"></div>
                                     </div>
                                 </div>
                             </div>
@@ -99,10 +98,10 @@ const Chatbot = () => {
                             value={userInput}
                             onChange={(e) => setUserInput(e.target.value)}
                             placeholder="Ask me anything..."
-                            className="flex-1 px-4 py-2 text-gray-800 bg-gray-100 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="flex-1 px-4 py-2 text-gray-800 bg-gray-100 border border-gray-300 rounded-full focus:outline-none focus:ring-1 focus:ring-[#504ee2]"
                             disabled={isLoading}
                         />
-                        <button type="submit" className="ml-3 p-3 text-white bg-blue-600 rounded-full hover:bg-blue-700 disabled:bg-gray-400" disabled={isLoading}>
+                        <button type="submit" className="ml-3 p-3 text-white bg-[#504ee2] rounded-full hover:bg-[#433ed1] disabled:bg-gray-400" disabled={isLoading}> {/* Blue theme for button */}
                             <PaperAirplaneIcon className="w-5 h-5" />
                         </button>
                     </form>
@@ -112,7 +111,7 @@ const Chatbot = () => {
             {/* Toggle Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className={`p-4 text-white bg-blue-600 rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform duration-200 ${isOpen ? 'scale-0' : 'scale-100'}`}
+                className={`p-4 text-white bg-[#504ee2] rounded-full shadow-md hover:bg-[#433ed1] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#504ee2] transition-transform duration-200 ${isOpen ? 'scale-0' : 'scale-100'}`}
             >
                 <ChatBubbleOvalLeftEllipsisIcon className="w-8 h-8" />
             </button>
