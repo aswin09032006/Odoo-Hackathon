@@ -29,7 +29,7 @@ const Chatbot = () => {
 
         try {
             // IMPORTANT: Retrieve the auth token from where you store it (e.g., localStorage, context)
-            const token = localStorage.getItem('authToken'); 
+            const token = localStorage.getItem('token'); 
 
             const response = await fetch('/api/chat', {
                 method: 'POST',
