@@ -3,12 +3,11 @@
  * @description Component for displaying and adding comments to a ticket.
  */
 
-import React, { useState } from 'react';
-import Input from '../Common/Input';
+import moment from 'moment';
+import { useState } from 'react';
+import { useAuth } from '../../hooks/useAuth'; // To show current user's role
 import Button from '../Common/Button';
 import LoadingSpinner from '../Common/LoadingSpinner';
-import moment from 'moment'; // For date formatting
-import { useAuth } from '../../hooks/useAuth'; // To show current user's role
 
 /**
  * CommentSection component handles displaying existing comments and allowing new ones to be added.
