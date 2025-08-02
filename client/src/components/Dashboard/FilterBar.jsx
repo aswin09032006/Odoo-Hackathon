@@ -6,29 +6,18 @@
 import React, { useState, useEffect } from 'react';
 import Input from '../Common/Input';
 import Button from '../Common/Button';
-import Toggle from '../Common/Toggle'; // Import the new Toggle component
-import api from '../../api'; // For fetching categories
-import { useAuth } from '../../hooks/useAuth'; // To determine user role
-import clsx from 'clsx'; // Import clsx
+import Toggle from '../Common/Toggle';
+import api from '../../api';
+import { useAuth } from '../../hooks/useAuth';
+import clsx from 'clsx';
+import { SlidersHorizontal } from 'lucide-react'; // A nice icon for the filter button
 
-/**
- * FilterBar component provides options to filter and sort tickets.
- * @param {Object} props - Component props.
- * @param {Object} props.filters - Current filter object (e.g., { status: 'Open', category: '...' }).
- * @param {Function} props.onFiltersChange - Callback function when filters change.
- * @param {string} props.searchQuery - Current search query string.
- * @param {Function} props.onSearchChange - Callback function when search query changes.
- * @param {string} props.sortBy - Current sort field (e.g., '-createdAt').
- * @param {Function} props.onSortChange - Callback function when sort field changes.
- * @param {boolean} [props.showMyTicketsToggle=false] - Whether to show the 'My Tickets' toggle.
- */
 const FilterBar = ({ filters, onFiltersChange, searchQuery, onSearchChange, sortBy, onSortChange, showMyTicketsToggle = false }) => {
   const [categories, setCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [showFilters, setShowFilters] = useState(false); // State for responsive filter toggle
-  const { user } = useAuth(); // To potentially show "My Tickets" for agents
+  const { user } = useAuth();
 
-  // Fetch categories on component mount
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -48,50 +37,55 @@ const FilterBar = ({ filters, onFiltersChange, searchQuery, onSearchChange, sort
   };
 
   const handleClearFilters = () => {
-    onFiltersChange({}); // Clear all filters
-    onSearchChange(''); // Clear search query
-    onSortChange('-createdAt'); // Reset sort to default
+    onFiltersChange({});
+    onSearchChange('');
+    onSortChange('-createdAt');
   };
 
+  // The title "FILTERS & SEARCH" should be placed in the parent component (e.g., DashboardPage)
+  // like this: <h2 className="text-sm font-bold uppercase text-[#504ee2] tracking-wider mb-4">Filters & Search</h2>
   return (
     <div className="bg-white p-6 rounded-lg border border-gray-200 mb-8">
-      {/* Changed md:items-end to md:items-start for consistent top alignment of labels */}
-      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-        {/* Search Input */}
-        <div className="w-full md:w-1/3"> {/* Search input takes roughly 1/3 of the space */}
-          <label htmlFor="search" className="block text-gray-700 text-sm font-medium mb-2">Search:</label>
-          <Input
-            id="search"
-            type="text"
-            placeholder="Subject or description..."
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:border-[#504ee2] focus:ring-1 focus:ring-[#504ee2]"
-          />
-        </div>
-
-        {/* Toggle Filters Button for smaller screens */}
-        <div className="md:hidden w-full">
+      {/* Container for all filters and the clear button */}
+      <div>
+        {/* Toggle Filters Button for smaller screens (visible below md) */}
+        <div className="md:hidden mb-4">
           <Button
             onClick={() => setShowFilters(!showFilters)}
-            className="w-full bg-[#504ee2] hover:bg-[#433ed1] text-white py-2 px-4 rounded-md text-sm"
+            className="w-full flex items-center justify-center text-gray-700 bg-gray-50 hover:bg-gray-100 border border-gray-300 py-2 px-4 rounded-md text-sm"
           >
-            {showFilters ? 'Hide Filters' : 'Show Filters'}
+            <SlidersHorizontal size={16} className="mr-2" />
+            {showFilters ? 'Hide Filters' : 'Show Filters & Sort'}
           </Button>
         </div>
 
-        {/* Filter and Sort Options (conditionally rendered for smaller screens) */}
-        {/* md:flex-grow takes the remaining 2/3 space. Items inside use md:flex-1 to distribute evenly. */}
-        <div className={clsx(`w-full md:flex md:flex-row md:flex-grow gap-4`, showFilters ? 'block' : 'hidden md:flex')}>
+        {/* Grid container for all filter inputs. Responsive columns. */}
+        <div className={clsx(
+          'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-x-6 gap-y-4',
+          showFilters ? 'grid' : 'hidden md:grid' // Toggled on mobile, always a grid on md+
+        )}>
+          {/* Search Input (spans 2 columns on lg screens for more space) */}
+          <div className="lg:col-span-2">
+            <label htmlFor="search" className="block text-gray-700 text-sm font-medium mb-1">Search:</label>
+            <Input
+              id="search"
+              type="text"
+              placeholder="Subject or description..."
+              value={searchQuery}
+              onChange={(e) => onSearchChange(e.target.value)}
+              className="w-full"
+            />
+          </div>
+
           {/* Status Filter */}
-          <div className="w-full md:flex-1"> {/* Changed md:w-1/4 to md:flex-1 */}
-            <label htmlFor="status" className="block text-gray-700 text-sm font-medium mb-2">Status:</label>
+          <div>
+            <label htmlFor="status" className="block text-gray-700 text-sm font-medium mb-1">Status:</label>
             <select
               id="status"
               name="status"
               value={filters.status || ''}
               onChange={handleFilterChange}
-              className="border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 focus:outline-none focus:border-[#504ee2] focus:ring-1 focus:ring-[#504ee2]"
+              className="border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 focus:outline-none focus:border-[#504ee2] focus:ring-1 focus:ring-[#504ee2] transition"
             >
               <option value="">All Statuses</option>
               <option value="Open">Open</option>
@@ -102,50 +96,44 @@ const FilterBar = ({ filters, onFiltersChange, searchQuery, onSearchChange, sort
           </div>
 
           {/* Category Filter */}
-          <div className="w-full md:flex-1"> {/* Changed md:w-1/4 to md:flex-1 */}
-            <label htmlFor="category" className="block text-gray-700 text-sm font-medium mb-2">Category:</label>
+          <div>
+            <label htmlFor="category" className="block text-gray-700 text-sm font-medium mb-1">Category:</label>
             <select
               id="category"
               name="category"
               value={filters.category || ''}
               onChange={handleFilterChange}
-              className="border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 focus:outline-none focus:border-[#504ee2] focus:ring-1 focus:ring-[#504ee2]"
+              className="border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 focus:outline-none focus:border-[#504ee2] focus:ring-1 focus:ring-[#504ee2] transition"
               disabled={loadingCategories}
             >
               <option value="">All Categories</option>
-              {loadingCategories ? (
-                <option>Loading categories...</option>
-              ) : (
-                categories.map((cat) => (
-                  <option key={cat._id} value={cat._id}>
-                    {cat.name}
-                  </option>
-                ))
-              )}
+              {categories.map((cat) => (
+                <option key={cat._id} value={cat._id}>{cat.name}</option>
+              ))}
             </select>
           </div>
 
           {/* Sort By */}
-          <div className="w-full md:flex-1"> {/* Changed md:w-1/4 to md:flex-1 */}
-            <label htmlFor="sort" className="block text-gray-700 text-sm font-medium mb-2">Sort By:</label>
+          <div>
+            <label htmlFor="sort" className="block text-gray-700 text-sm font-medium mb-1">Sort By:</label>
             <select
               id="sort"
               name="sort"
               value={sortBy}
               onChange={(e) => onSortChange(e.target.value)}
-              className="border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 focus:outline-none focus:border-[#504ee2] focus:ring-1 focus:ring-[#504ee2]"
+              className="border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 focus:outline-none focus:border-[#504ee2] focus:ring-1 focus:ring-[#504ee2] transition"
             >
               <option value="-createdAt">Newest First</option>
               <option value="createdAt">Oldest First</option>
               <option value="-updatedAt">Recently Modified</option>
-              <option value="-comments.length">Most Replied</option>
-              <option value="-upvotes.length">Most Upvoted</option>
             </select>
           </div>
 
-          {/* "My Tickets" Toggle for Support Agents */}
+          {/* "My Tickets" Toggle (conditionally rendered) */}
           {showMyTicketsToggle && (user?.role === 'support-agent' || user?.role === 'admin') && (
-            <div className="w-full md:flex-1 flex items-end justify-center md:justify-start pt-6 md:pt-0"> {/* Changed md:w-auto to md:flex-1 */}
+            // FIX: Use flex items-end to push the toggle to the bottom of the grid cell, aligning it with other inputs.
+            // md:col-start-1 and lg:col-start-auto handle wrapping correctly.
+            <div className="flex items-end h-full md:col-start-1 lg:col-start-auto">
               <Toggle
                 id="my_tickets"
                 label="My Assigned Tickets"
@@ -155,15 +143,16 @@ const FilterBar = ({ filters, onFiltersChange, searchQuery, onSearchChange, sort
             </div>
           )}
         </div>
-      </div>
-      {/* Clear Filters Button */}
-      <div className="mt-6 text-right">
-        <Button
-          onClick={handleClearFilters}
-          className="border border-gray-300 text-gray-700 hover:bg-gray-100 py-2 px-4 rounded-md text-sm"
-        >
-          Clear Filters
-        </Button>
+
+        {/* Clear Filters Button */}
+        <div className="flex justify-end mt-6">
+          <Button
+            onClick={handleClearFilters}
+            className="border border-gray-300 text-gray-700 hover:bg-gray-100 py-2 px-4 rounded-md text-sm"
+          >
+            Clear Filters
+          </Button>
+        </div>
       </div>
     </div>
   );

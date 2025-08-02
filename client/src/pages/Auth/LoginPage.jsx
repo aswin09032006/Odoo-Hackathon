@@ -6,8 +6,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import Input from '../../components/Common/Input'; // Assuming Input component has consistent styling
-import Button from '../../components/Common/Button'; // Assuming Button component has consistent styling
+import Input from '../../components/Common/Input';
+import Button from '../../components/Common/Button';
 import LoadingSpinner from '../../components/Common/LoadingSpinner';
 import toast from 'react-hot-toast';
 
@@ -52,14 +52,12 @@ function LoginPage() {
     if (result.success) {
       navigate('/dashboard');
     }
-    // Backend errors are shown via toast notifications from AuthContext
   };
 
   return (
-    <div className="flex justify-center items-center flex-1 px-4"> {/* Added horizontal padding */}
-      {/* Form Container: Replaced shadow with border, adjusted padding */}
+    // FIX: Replaced flex-1 with h-full to enable vertical centering.
+    <div className="flex h-full justify-center items-center px-4">
       <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg border border-gray-200 w-full max-w-md">
-        {/* Title: Reduced font size, uppercase, blue themed, tracking-wide */}
         <h2 className="text-xl font-semibold uppercase tracking-wide mb-8 text-center text-[#504ee2]">Login to QuickDesk</h2>
 
         <Input
@@ -84,7 +82,6 @@ function LoginPage() {
           error={passwordError}
         />
 
-        {/* Login Button: Blue themed, font-medium */}
         <Button
           type="submit"
           disabled={loading}
@@ -104,7 +101,7 @@ function LoginPage() {
           <button
             type="button"
             onClick={() => navigate('/register')}
-            className="text-[#504ee2] hover:text-[#433ed1] font-medium transition-colors duration-200" // Blue themed register link
+            className="text-[#504ee2] hover:text-[#433ed1] font-medium transition-colors duration-200"
           >
             Register
           </button>
