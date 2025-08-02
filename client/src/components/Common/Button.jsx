@@ -23,8 +23,7 @@ const Button = ({ type = 'button', onClick, disabled = false, className = '', ch
       onClick={onClick}
       disabled={disabled}
       className={clsx(
-        "font-semibold py-2 px-4 rounded-md shadow-sm transition-all duration-200 ease-in-out", // Base styles for all buttons
-        "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500", // Focus styles
+        "font-semibold py-2 px-4 rounded-md transition-all duration-200 ease-in-out", // Base styles for all buttons
         {
           'bg-blue-600 hover:bg-blue-700 text-white': !className.includes('bg-') && !className.includes('text-'), // Default primary style if no background/text color is specified in className
           'opacity-50 cursor-not-allowed': disabled,
